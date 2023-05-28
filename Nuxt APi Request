@@ -1,0 +1,76 @@
+<template>
+  <div>
+
+
+    <div v-if="pending">
+      pending
+    </div>
+    <div v-if="error">
+      error
+    </div>
+    <div v-else-if="execute">
+      <div class="border">
+        <input v-model.number="id" placeholder="id">
+        <input v-model="first_name" placeholder="first">
+        <input v-model="last_name" placeholder="last">
+        <button @click.prevent="handleSubmit">next</button>
+      </div>
+      <table>
+        <tr v-for="user in data" class="border">
+          <td>{{ user.id }}</td>
+          <td>{{ user.first_name }}</td>
+          <td>{{ user.last_name }}</td>
+        </tr>
+      </table>
+      <div class="flex gap-5">
+        <button @click="previous">previous</button>
+        <p>{{ page }}</p>
+        <button @click="next">next</button>
+
+        snippets
+      </div>
+    </div>
+
+
+
+  </div>
+</template>
+
+<script setup>
+
+const page = ref(50);
+const api = "http://localhost:3000"
+
+
+// fetch the data
+const {data, refresh, error, pending, execute} = await useFetch(() => `${api}/users?_start=${page.value}&_limit=10`, {method: "GET"})
+
+
+// post to data
+const id = ref(null)
+const first_name = ref(null)
+const last_name = ref(null)
+
+
+const handleSubmit = async () => {
+  const {response, error} = await useFetch(() => `${api}/users`, {
+        method: "POST",
+        body: { id, first_name, last_name }
+      }
+  )
+
+  console.log(response)
+   refresh()
+
+}
+
+function previous() {
+  page.value -= 10;
+  refresh()
+}
+
+function next() {
+  page.value += 10;
+  refresh()
+}
+</script>
